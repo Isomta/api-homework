@@ -8,6 +8,7 @@ User = get_user_model()
 
 import datetime
 
+
 def today_year():
     return int(datetime.date.today().year)
 

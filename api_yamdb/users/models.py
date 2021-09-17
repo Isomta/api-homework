@@ -34,3 +34,8 @@ class User(AbstractUser):
 
     class Meta:
         ordering = ('id',)
+
+
+@property
+def is_user(self):
+    return self.role == 'user'

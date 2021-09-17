@@ -1,10 +1,6 @@
 from rest_framework import serializers
 
-from .models import Genre, Category, Title
-
-from rest_framework import serializers
-
-from .models import Comment, Review
+from .models import Category, Comment, Genre, Review, Title
 
 
 class GenresSerializer(serializers.ModelSerializer):

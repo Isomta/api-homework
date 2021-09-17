@@ -1,45 +1,44 @@
-from .filters import CustomFilter
-from .models import Category, Genre, Title
-from rest_framework import filters, viewsets
-from rest_framework.permissions import IsAuthenticated
-from django.db.models import Avg
-
-from .permissions import AdminOrReadOnly
-from .serializers import (
-    GenresSerializer, CategoriesSerializer, TitleSerializer,TitleAdminSerializer)
-
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
-from rest_framework import permissions
+from rest_framework import filters, permissions, viewsets, mixins
+from rest_framework.generics import CreateAPIView, ListAPIView
 
-from .models import Review
-from .serializers import (CommentSerializer, ReviewSerializer)
-from .permissions import IsOwnerOrReadOnly
+from .filters import TitleFilter
+from .models import Category, Genre, Review, Title
+from .permissions import AdminOrReadOnly, IsOwnerOrReadOnly, \
+    IsAdminOrReadOnly1
+from .serializers import (CategoriesSerializer, CommentSerializer,
+                          GenresSerializer, ReviewSerializer,
+                          TitleAdminSerializer, TitleSerializer)
 
 
-
-class CategoriesViewSet(viewsets.ModelViewSet):
+class CategoriesViewSet(
+    mixins.CreateModelMixin, mixins.DestroyModelMixin, mixins.ListModelMixin,
+    viewsets.GenericViewSet):
     queryset = Category.objects.all()
     serializer_class = CategoriesSerializer
-    permission_classes = [IsAuthenticated]
-    filter_backends = (AdminOrReadOnly,)
-    search_fields = ['name',]
+    permission_classes = [IsAdminOrReadOnly1,]
+    #filterset_class = CustomFilter
+    search_fields = ['name']
     lookup_field = 'slug'
 
 
-class GenresViewSet(viewsets.ModelViewSet):
+class GenresViewSet(
+    mixins.CreateModelMixin, mixins.DestroyModelMixin, mixins.ListModelMixin,
+    viewsets.GenericViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenresSerializer
-    permission_classes = (AdminOrReadOnly,)
+    permission_classes = [IsAdminOrReadOnly1, ]
     filter_backends = (filters.SearchFilter,)
-    search_fields = ['name',]
+    search_fields = ['name']
+    #filterset_class = CustomFilter
     lookup_field = 'slug'
 
 
 class TitlesViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all().annotate(rating=Avg('reviews__score'))
-    permission_classes = (AdminOrReadOnly,)
-    filterset_class = CustomFilter
+    permission_classes = [IsAdminOrReadOnly1, ]
+    filterset_class = TitleFilter
 
     def get_serializer_class(self):
         if self.action in ['create', 'partial_update', 'destroy']:

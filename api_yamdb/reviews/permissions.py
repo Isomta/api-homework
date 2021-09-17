@@ -1,20 +1,18 @@
-from rest_framework.permissions import BasePermission, SAFE_METHODS
-
 from rest_framework import permissions
+from rest_framework.permissions import SAFE_METHODS, BasePermission
 
 from .models import User
 
-
 class IsAdminOrReadOnly1(permissions.BasePermission):
     def has_permission(self, request, view):
-        return  request.method in permissions.SAFE_METHODS \
-            or (request.user.is_superuser \
-            or request.user.role == User.ADMIN)
+        return (request.method in permissions.SAFE_METHODS or
+                request.user.is_authenticated and
+                (request.user.is_superuser or request.user.role == User.ADMIN))
 
     def has_object_permission(self, request, view, obj):
-        return  request.method in permissions.SAFE_METHODS \
-            or (request.user.is_superuser \
-            or request.user.role == User.ADMIN)
+        return request.user or (request.user.is_authenticated and
+                (request.user.is_superuser or request.user.role == User.ADMIN))
+
 
 class AdminOrReadOnly(BasePermission):
     def has_permission(self, request, view):
@@ -50,9 +48,6 @@ class IsOwnerOrReadOnly(permissions.BasePermission):
                 or request.user.role == User.MODERATOR \
                 or request.user.role == User.ADMIN
         return False
-
-
-
 
 
 class AdminOnly(BasePermission):
